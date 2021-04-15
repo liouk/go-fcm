@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -127,6 +128,12 @@ func (c *Client) send(data []byte) (*Response, error) {
 	}
 	defer resp.Body.Close()
 
+	rawResp, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	resp.Body = ioutil.NopCloser(bytes.NewBuffer(rawResp))
+
 	// check response status
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode >= http.StatusInternalServerError {
@@ -141,5 +148,7 @@ func (c *Client) send(data []byte) (*Response, error) {
 		return nil, err
 	}
 
+	response.Debug.HttpCode = resp.Status
+	response.Debug.RawResponse = string(rawResp)
 	return response, nil
 }

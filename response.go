@@ -119,6 +119,14 @@ type Response struct {
 	// Topic HTTP response
 	MessageID int64 `json:"message_id"`
 	Error     error `json:"error"`
+
+	// Debug fields
+	Debug Debug `json:"debug,omitempty"`
+}
+
+type Debug struct {
+	HttpCode    string `json:"http_code"`
+	RawResponse string `json:"raw_response"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface.
@@ -136,6 +144,9 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 		// Topic HTTP response
 		MessageID int64  `json:"message_id"`
 		Error     string `json:"error"`
+
+		// Debug fields
+		Debug Debug `json:"debug,omitempty"`
 	}
 
 	if err := json.Unmarshal(data, &response); err != nil {
@@ -157,6 +168,8 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 			r.Error = ErrUnknown
 		}
 	}
+
+	r.Debug = response.Debug
 
 	return nil
 }
